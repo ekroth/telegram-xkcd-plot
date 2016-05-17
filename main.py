@@ -1,3 +1,11 @@
+import matplotlib as mpl
+mpl.use('TkAgg')
+import matplotlib.pyplot as plt
+
+import numpy as np
+
+from xkcd_plot import XKCDify
+
 import telegram
 from telegram.error import NetworkError, Unauthorized
 
@@ -35,9 +43,39 @@ def handle(bot, update_id):
 
     for u in updates:
         update_id = u.update_id + 1
-        bot.sendMessage(chat_id=u.message.chat_id, text="Andy is king you know")
+
+        chat_id = u.message.chat_id
+
+        bot.sendMessage(chat_id=chat_id, text="Andy is king you know")
+
+        ax = test_fig()
+        plt.savefig('temp.png')
+
+        bot.sendPhoto(chat_id=chat_id, photo=open('temp.png', 'rb'))
+        plt.clf()
 
     return update_id
+
+def test_fig():
+    ax = plt.axes()
+
+    x = np.linspace(-10, 10, 100)
+    ax.plot(x, -x, 'b')
+
+    ax.set_title('APPLE IS KING')
+    ax.set_xlabel('IPHONES')
+    ax.set_ylabel('BROKEN')
+
+    ax.legend(loc='lower right')
+
+    XKCDify(ax,
+            xaxis_loc=0.0,
+            yaxis_loc=0.0,
+            xaxis_arrow='+-',
+            yaxis_arrow='+-',
+            expand_axes=True)
+
+    return ax
 
 
 if __name__ == "__main__":
