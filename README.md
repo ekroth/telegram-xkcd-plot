@@ -1,5 +1,13 @@
 # Telegram XKCD Plot Bot
 
+## Usage
+- Install dependencies
+`pip install -r requirements.txt`
+- Source environment
+`source venv/bin/activate`
+- Run
+`python main.py`
+
 ## Issues
 `matplotlib` might fail on OSX, export the following:
 ```
