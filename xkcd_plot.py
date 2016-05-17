@@ -11,8 +11,8 @@ The idea for this comes from work by Damon McDougall
   http://www.mail-archive.com/matplotlib-users@lists.sourceforge.net/msg25499.html
 """
 import numpy as np
-import pylab as pl
 from scipy import interpolate, signal
+import matplotlib.pyplot as pl
 import matplotlib.font_manager as fm
 
 
