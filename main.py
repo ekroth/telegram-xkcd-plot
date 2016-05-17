@@ -1,26 +1,54 @@
-import matplotlib as mpl
-mpl.use('TkAgg')
-import matplotlib.pyplot as plt
-import numpy as np
-from parse import string2func
-from xkcd_plot import XKCDify
+from telegram.ext import Updater, CommandHandler,\
+     StringCommandHandler,\
+     MessageHandler, Filters
 
-from telegram.ext import Updater, CommandHandler, MessageHandler, Filters
-
-from time import sleep
 import logging
+import plotting
+import random
 
 logger = logging.getLogger()
 logger.setLevel(logging.DEBUG)
 
 def start(bot, update):
-    bot.sendMessage(chat_id=update.message.chat_id, text="I won't help you.")
+    bot.sendMessage(chat_id=update.message.chat_id, text="Hi!")
+
+def help(bot, update):
+    bot.sendMessage(chat_id=update.message.chat_id, text="Do your own plotting.")
 
 def unknown(bot, update):
     bot.sendMessage(chat_id=update.message.chat_id, text="Sorry, I didn't understand that command.")
 
 def error(bot, update, error):
     logger.warn('Update "%s" caused error "%s"' % (update, error))
+
+def text(bot, update):
+    bot.sendMessage(chat_id=update.message.chat_id, text="What, I don't care about '" + update.message.text + "'.")
+
+def plot(bot, update, args):
+    plot2(bot, update, ["-1.0", "1.0"] + args)
+
+def plot2(bot, update, args):
+    try:
+        a = float(args[0])
+        b = float(args[1])
+        text = ' '.join(args[2:])
+        bot.sendMessage(chat_id=update.message.chat_id, text="Plotting [" + str(a) + ", " + str(b) + "] '" + text + "'.")
+        file_name = plotting.plot(text, a, b)
+        bot.sendPhoto(chat_id=update.message.chat_id, photo=open(file_name, 'rb'))
+        bot.sendMessage(chat_id=update.message.chat_id, text=plot_response() + "!")
+    except Exception, e:
+        bot.sendMessage(chat_id=update.message.chat_id, text="Invalid input because '" + e.message + "'.")
+
+def plot_response():
+    responses = [
+        "Magnificent", "Sumptuous", "Grand", "Impressive",\
+        "Imposing", "Superb", "Spectacular", "Resplendent",\
+        "Opulent", "Luxurious", "Palatial", "Deluxe", "Rich",\
+        "Fine", "Costly", "Expensive", "Lavish", "Ornate", "Gorgeous",\
+        "Glorious", "Dazzling", "Elegant", "Handsome", "Beautiful",\
+        "Stately", "Majestic", "Kingly", "Princely", "Regal", "Noble"]
+
+    return random.choice(responses)
 
 def main():
 
@@ -33,8 +61,18 @@ def main():
     updater = Updater(token=token)
     dp = updater.dispatcher
 
-    # Setup handlers
+    # Standard handlers
     dp.add_handler(CommandHandler('start', start))
+    dp.add_handler(CommandHandler('help', help))
+
+    # Plotting
+    dp.add_handler(CommandHandler('plot', plot, pass_args=True))
+    dp.add_handler(CommandHandler('plot2', plot2, pass_args=True))
+
+    # Text
+    dp.add_handler(MessageHandler([Filters.text], text))
+
+    # Fallback
     dp.add_handler(MessageHandler([Filters.command], unknown))
 
     # Log all errors
