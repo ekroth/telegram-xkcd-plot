@@ -50,6 +50,9 @@ def plot4(bot, update, args):
     m = re.search(p, text)
 
     try:
+        if not m:
+            raise Exception("Invalid pattern.")
+
         # Read inputs
         title = str(m.group(1))
         x_legend = str(m.group(2))
@@ -58,14 +61,12 @@ def plot4(bot, update, args):
         high = float(m.group(5))
         fs = [f.strip() for f in str(m.group(6)).split(',')]
 
-        bot.sendMessage(chat_id=update.message.chat_id, text=
-                        "Plotting '{0}' x: '{1}' y: '{2}' [{3}, {4}] of '{5}'".format(
-                            title, x_legend, y_legend, low, high, ', '.join(fs)))
+        bot.sendMessage(chat_id=update.message.chat_id, text='Get ready for some serious plotting.')
         file_name = plotting.plot(title, x_legend, y_legend, low, high, fs)
         bot.sendPhoto(chat_id=update.message.chat_id, photo=open(file_name, 'rb'))
         bot.sendMessage(chat_id=update.message.chat_id, text=plot_response() + "!")
     except Exception, e:
-        bot.sendMessage(chat_id=update.message.chat_id, text="Invalid input because '" + e.message + "'.")
+        bot.sendMessage(chat_id=update.message.chat_id, text="I'm out. " + e.message + "")
 
 def plot_response():
     responses = [
