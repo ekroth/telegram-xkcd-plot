@@ -5,15 +5,29 @@ from telegram.ext import Updater, CommandHandler,\
 import logging
 import plotting
 import random
+import re
+import sys
 
 logger = logging.getLogger()
 logger.setLevel(logging.DEBUG)
 
 def start(bot, update):
-    bot.sendMessage(chat_id=update.message.chat_id, text="Hi!")
+    bot.sendMessage(chat_id=update.message.chat_id, text="Hi! Type '/help'.")
 
 def help(bot, update):
-    bot.sendMessage(chat_id=update.message.chat_id, text="Do your own plotting.")
+    bot.sendMessage(chat_id=update.message.chat_id, text=
+                    "/start - Seems like every bot needs this.\n"
+                    "/help - This, obviously.\n"
+                    "/plot <func>\n"
+                    "      ex: sin(x) + x^2\n"
+                    "/plot2 <start> <end>, <func>\n"
+                    "      ex: -3.14, 3.14, cos(x)\n"
+                    "/plot3 <title>, <x-label>, <y-label>, <func>\n"
+                    "      ex: Gainz Plot, Gainz, Injuries, x^2\n"
+                    "/plot4 <title>, <x-label>, <y-label>, <start> <end>, <func>\n"
+                    "      ex: Gainz Plot, Gainz, Injuries, 0 100, x^2\n"
+                    "Happy plotting!"
+                    )
 
 def unknown(bot, update):
     bot.sendMessage(chat_id=update.message.chat_id, text="Sorry, I didn't understand that command.")
@@ -24,16 +38,30 @@ def error(bot, update, error):
 def text(bot, update):
     bot.sendMessage(chat_id=update.message.chat_id, text="What, I don't care about '" + update.message.text + "'.")
 
-def plot(bot, update, args):
-    plot2(bot, update, ["-1.0", "1.0"] + args)
+def plot4(bot, update, args):
+    # Patterns
+    title_t = '[ ]*([a-zA-Z0-9 ]+)'
+    range_t = '[ ]*([0-9\.\-]+)[ ]+([0-9\.\-]+)[ ]*'
+    funcs_t = '(.+)'
+    sep_t   = '[ ]*,[ ]*'
 
-def plot2(bot, update, args):
+    text = ' '.join(args)
+    p = sep_t.join([title_t, title_t, title_t, range_t, funcs_t])
+    m = re.search(p, text)
+
     try:
-        a = float(args[0])
-        b = float(args[1])
-        text = ' '.join(args[2:])
-        bot.sendMessage(chat_id=update.message.chat_id, text="Plotting [" + str(a) + ", " + str(b) + "] '" + text + "'.")
-        file_name = plotting.plot(text, a, b)
+        # Read inputs
+        title = str(m.group(1))
+        x_legend = str(m.group(2))
+        y_legend = str(m.group(3))
+        low = float(m.group(4))
+        high = float(m.group(5))
+        fs = [f.strip() for f in str(m.group(6)).split(',')]
+
+        bot.sendMessage(chat_id=update.message.chat_id, text=
+                        "Plotting '{0}' x: '{1}' y: '{2}' [{3}, {4}] of '{5}'".format(
+                            title, x_legend, y_legend, low, high, ', '.join(fs)))
+        file_name = plotting.plot(title, x_legend, y_legend, low, high, fs)
         bot.sendPhoto(chat_id=update.message.chat_id, photo=open(file_name, 'rb'))
         bot.sendMessage(chat_id=update.message.chat_id, text=plot_response() + "!")
     except Exception, e:
@@ -66,8 +94,7 @@ def main():
     dp.add_handler(CommandHandler('help', help))
 
     # Plotting
-    dp.add_handler(CommandHandler('plot', plot, pass_args=True))
-    dp.add_handler(CommandHandler('plot2', plot2, pass_args=True))
+    dp.add_handler(CommandHandler('plot4', plot4, pass_args=True))
 
     # Text
     dp.add_handler(MessageHandler([Filters.text], text))

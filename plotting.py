@@ -7,15 +7,20 @@ import numpy as np
 from parse import string2func
 from xkcd_plot import XKCDify
 
-def plot(text, a=None, b=None):
-    a = a or -1.0
-    b = b or 1.0
-
-    func = string2func(text)
-    x = np.linspace(a, b, 100)
+def plot(title, x_legend, y_legend, low, high, fs):
+    xs = np.linspace(low, high, 100)
     ax = plt.axes()
-    ax.plot(x, func(x))
-    plt.xlim(a, b)
+
+    ax.set_title(title)
+    ax.set_xlabel(x_legend)
+    ax.set_ylabel(y_legend)
+    plt.xlim(low, high)
+
+    for f in fs:
+        func = string2func(f)
+        ax.plot(xs, func(xs), label=f)
+
+    ax.legend(loc='lower right')
 
     XKCDify(ax,
             xaxis_loc=0.0,
