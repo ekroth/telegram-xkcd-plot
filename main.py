@@ -18,8 +18,10 @@ def help(bot, update):
     bot.sendMessage(chat_id=update.message.chat_id, text=
                     "/start - Seems like every bot needs this.\n"
                     "/help - This, obviously.\n"
+                    "/quiet - Don't be verbose.\n"
+                    "/examples - What can I do?\n"
                     "/plot <func>\n"
-                    "      ex: sin(x) + x^2\n"
+                    "      ex: sin(x) + x^2, cos(x)\n"
                     "/plot2 <start> <end>, <func>\n"
                     "      ex: -3.14, 3.14, cos(x)\n"
                     "/plot3 <title>, <x-label>, <y-label>, <func>\n"
@@ -28,6 +30,25 @@ def help(bot, update):
                     "      ex: Gainz Plot, Gainz, Injuries, 0 100, x^2\n"
                     "Happy plotting!"
                     )
+
+def quiet(bot, update):
+    bot.sendMessage(chat_id=update.message.chat_id, text="No, I will continue being verbose.")
+
+def examples(bot, update):
+    xs = [
+        ("I can do simple plots, such as sin(x).", "/plot", "sin(x)", lambda x: plot1(bot, update, [x])),
+        ("That looks odd, let's change the range!", "/plot2", "-3.14 3.14, sin(x)", lambda x: plot2(bot, update, [x])),
+        ("Damn, how does cos(x) look compared to sin(x)?", "/plot2", "-3.14 3.14, sin(x), cos(x)", lambda x: plot2(bot, update, [x])),
+        ("Let's do some titles.", "/plot3", "PlottyBot, Time, Awesome, x^2", lambda x: plot3(bot, update, [x])),
+        ("Let's do everything!.", "/plot4", "PlottyBot, Time, Swoopin, -6.28 5, cos(x) - 2^x, sin(x) + 2*x", lambda x: plot4(bot, update, [x]))
+    ]
+
+    bot.sendMessage(chat_id=update.message.chat_id, text="I'm awesome in so many ways!")
+
+    for (msg, cmd, args, exe) in xs:
+        bot.sendMessage(chat_id=update.message.chat_id, text=msg)
+        bot.sendMessage(chat_id=update.message.chat_id, text="{0} {1}".format(cmd, args))
+        exe(args)
 
 def unknown(bot, update):
     bot.sendMessage(chat_id=update.message.chat_id, text="Sorry, I didn't understand that command.")
@@ -58,8 +79,6 @@ def plot(bot, update, text):
     range_t = '[ ]*([0-9\.\-]+)[ ]+([0-9\.\-]+)[ ]*'
     funcs_t = '(.+)'
     sep_t   = '[ ]*,[ ]*'
-
-    print(text)
 
     p = sep_t.join([title_t, title_t, title_t, range_t, funcs_t])
     m = re.search(p, text)
@@ -108,6 +127,8 @@ def main():
     # Standard handlers
     dp.add_handler(CommandHandler('start', start))
     dp.add_handler(CommandHandler('help', help))
+    dp.add_handler(CommandHandler('quiet', quiet))
+    dp.add_handler(CommandHandler('examples', examples))
 
     # Plotting
     dp.add_handler(CommandHandler('plot',  plot1, pass_args=True))
