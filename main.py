@@ -38,14 +38,29 @@ def error(bot, update, error):
 def text(bot, update):
     bot.sendMessage(chat_id=update.message.chat_id, text="What, I don't care about '" + update.message.text + "'.")
 
+def plot1(bot, update, args):
+    plot(bot, update, ' '.join(["Plot,x,y,-1.0 1.0,"] + args))
+
+def plot2(bot, update, args):
+    plot(bot, update, ' '.join(["Plot,x,y,"] + args))
+
+def plot3(bot, update, args):
+    text = ' '.join(args)
+    ts = text.split(',')
+    plot(bot, update, ', '.join(ts[0:3]) + ",-1.0 1.0," + ', '.join(ts[3:]))
+
 def plot4(bot, update, args):
+    plot(bot, update, ' '.join(args))
+
+def plot(bot, update, text):
     # Patterns
     title_t = '[ ]*([^,]+)'
     range_t = '[ ]*([0-9\.\-]+)[ ]+([0-9\.\-]+)[ ]*'
     funcs_t = '(.+)'
     sep_t   = '[ ]*,[ ]*'
 
-    text = ' '.join(args)
+    print(text)
+
     p = sep_t.join([title_t, title_t, title_t, range_t, funcs_t])
     m = re.search(p, text)
 
@@ -95,6 +110,9 @@ def main():
     dp.add_handler(CommandHandler('help', help))
 
     # Plotting
+    dp.add_handler(CommandHandler('plot',  plot1, pass_args=True))
+    dp.add_handler(CommandHandler('plot2', plot2, pass_args=True))
+    dp.add_handler(CommandHandler('plot3', plot3, pass_args=True))
     dp.add_handler(CommandHandler('plot4', plot4, pass_args=True))
 
     # Text
