@@ -40,7 +40,7 @@ def text(bot, update):
 
 def plot4(bot, update, args):
     # Patterns
-    title_t = '[ ]*([a-zA-Z0-9 ]+)'
+    title_t = '[ ]*([^,]+)'
     range_t = '[ ]*([0-9\.\-]+)[ ]+([0-9\.\-]+)[ ]*'
     funcs_t = '(.+)'
     sep_t   = '[ ]*,[ ]*'
