@@ -17,6 +17,7 @@ def plot(title, x_legend, y_legend, low, high, fs):
     plt.xlim(low, high)
 
     for f in fs:
+        f = f + " + 0*x"
         func = string2func(f)
         ax.plot(xs, func(xs), label=f)
 
