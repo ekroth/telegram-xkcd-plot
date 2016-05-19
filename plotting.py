@@ -3,6 +3,7 @@ mpl.use('Agg')
 import matplotlib.pyplot as plt
 
 import numpy as np
+from stopit import threading_timeoutable as timeoutable
 
 from parse import string2func
 from xkcd_plot import XKCDify
@@ -16,13 +17,19 @@ def plot(title, x_legend, y_legend, low, high, fs):
     ax.set_ylabel(y_legend)
     plt.xlim(low, high)
 
-    for f in fs:
-        fix = f + " + 0*x"
-        func = string2func(fix)
-        ax.plot(xs, func(xs), label=f)
+    @timeoutable()
+    def calc():
+        for f in fs:
+            fix = f + " + 0*x"
+            func = string2func(fix)
+            ax.plot(xs, func(xs), label=f)
+
+        return True
+
+    if calc(timeout=1) is None:
+        raise Exception("Calculation timeout.")
 
     ax.legend(loc='lower right')
-
     XKCDify(ax,
             xaxis_loc=0.0,
             yaxis_loc=0.0,
