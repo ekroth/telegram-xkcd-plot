@@ -1,10 +1,8 @@
 # Telegram XKCD Plot Bot
 
 ## Usage
-- Install virtualenv
-`pip install virtualenv`
 - Create venv
-`virtualenv venv`
+`virtualenv --system-site-packages venv`
 - Source environment
 `source venv/bin/activate`
 - Install dependencies
